@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes | Café y Aroma</title>
+</head>
+<body>
+    <h1>Clientes interesados</h1>
+    <form id="clienteForm">
+        <input name="nombre" placeholder="Nombre" required>
+        <input name="correo" type="email" placeholder="Correo" required>
+        <input name="productoInteres" placeholder="Producto de interés" required>
+        <button type="submit">Guardar cliente</button>
+        <p id="mensaje" role="status"></p>
+    </form>
+    <h2>Registros guardados</h2>
+    <ul id="listaClientes"></ul>
+    <script>
+        const formulario = document.querySelector('#clienteForm');
+        const lista = document.querySelector('#listaClientes');
+        const mensaje = document.querySelector('#mensaje');
+        const cargarClientes = async () => {
+            const respuesta = await fetch('/api/clientes');
+            const clientes = await respuesta.json();
+            lista.innerHTML = clientes.map((cliente) => '<li>' + cliente.nombre + ' - ' + cliente.correo + ' - ' + cliente.productoInteres + '</li>').join('');
+        };
+        formulario.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const respuesta = await fetch('/api/clientes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(formulario))) });
+            const resultado = await respuesta.json();
+            mensaje.textContent = respuesta.ok ? 'Cliente guardado.' : resultado.error;
+            if (respuesta.ok) { formulario.reset(); cargarClientes(); }
+        });
+        cargarClientes();
+    </script>
+</body>
+</html>
